@@ -20,7 +20,7 @@ FROM eclipse-temurin:17-jre
 WORKDIR /app
 
 # Copy the built jar file from builder stage
-COPY --from=build /app/target/My-Sky-Application-backend-0.0.1-SNAPSHOT.jar app.jar
+COPY --from-build /app/target/skyapp-backend-0.0.1-SNAPSHOT.jar app.jar
 
 # Expose port (commonly 8080)
 EXPOSE 8080
