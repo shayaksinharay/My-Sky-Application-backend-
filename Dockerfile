@@ -1,21 +1,29 @@
-# Use Eclipse Temurin Java 21 as base image
-FROM eclipse-temurin:21-jdk
+# Use Maven to build the app
+FROM maven:3.8.6-eclipse-temurin-17 AS build
 
-# Set working directory inside the container
+# Set working directory
 WORKDIR /app
 
-# Copy Maven project files
+# Copy pom.xml and download dependencies
 COPY pom.xml .
+
+# Copy the source code
 COPY src ./src
 
-# Install Maven
-RUN apt-get update && apt-get install -y maven
-
-# Build the application
+# Build the jar (skip tests to speed up)
 RUN mvn clean package -DskipTests
 
-# Expose port (change if your Spring Boot app uses a different port)
+# Use a lightweight Java runtime
+FROM eclipse-temurin:17-jre
+
+# Set working directory
+WORKDIR /app
+
+# Copy the built jar file from builder stage
+COPY --from=build /app/target/My-Sky-Application-backend-0.0.1-SNAPSHOT.jar app.jar
+
+# Expose port (commonly 8080)
 EXPOSE 8080
 
-# Run the jar file
-CMD ["java", "-jar", "target/My-Sky-Application-backend-0.0.1-SNAPSHOT.jar"]
+# Run the jar
+ENTRYPOINT ["java", "-jar", "app.jar"]
